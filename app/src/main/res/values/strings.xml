@@ -1,0 +1,78 @@
+<resources>
+    <string name="app_name">My Cinema</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Mike</string>
+    <string name="nav_header_subtitle">mike.jung.global@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+
+    <string name="data">군도, 백성을 구하라!\n
+ 양반과 탐관오리들의 착취가 극에 달했던 조선 철종 13년. 힘 없는 백성의 편이 되어
+ 세상을 바로잡고자 하는 의적떼인 군도(群盜), 지리산 추설이 있었다.
+\n\n
+ 쌍칼 도치 vs 백성의 적 조윤
+ 잦은 자연재해, 기근과 관의 횡포까지 겹쳐 백성들의 삶이 날로 피폐해 져 가는 사이,
+ 나주 대부호의 서자로 조선 최고의 무관 출신인 조윤은 극악한 수법으로 양민들을 수탈,
+ 삼남지방 최고의 대부호로 성장한다. 한편 소, 돼지를 잡아 근근이 살아가던 천한 백정 돌무치는
+ 죽어도 잊지 못할 끔찍한 일을 당한 뒤 군도에 합류. 지리산 추설의 신 거성(新 巨星) 도치로 거듭난다.
+\n\n
+ 뭉치면 백성, 흩어지면 도적!
+ 망할 세상을 뒤집기 위해, 백성이 주인인 새 세상을 향해 도치를 필두로 한 군도는 백성의 적,
+ 조윤과 한 판 승부를 시작하는데…</string>
+    <string name="movie_title">군도</string>
+    <string name="plz_input">평점을 입력해 주세요</string>
+    <string name="review_guide">100자 이내로 작성해주세요.</string>
+    <string name="default_date">2014.07.23 개봉</string>
+    <string name="default_title">군도</string>
+    <string name="default_genre_time">액션 / 137분</string>
+    <string name="advance_rate">예매율</string>
+    <string name="default_ranking">5위</string>
+    <string name="default_adv_rate">1.8%</string>
+    <string name="grade">평점</string>
+    <string name="default_grade">8.2</string>
+    <string name="acc_audience">누적관객수</string>
+    <string name="default_acc_audience">839,399명</string>
+    <string name="summary">줄거리</string>
+    <string name="creator">감독/출연</string>
+    <string name="director">감독</string>
+    <string name="default_director">윤종빈</string>
+    <string name="cast">출연</string>
+    <string name="default_cast">하정우(도치), 강동원(조윤)</string>
+    <string name="review">한줄평</string>
+    <string name="write">작성하기</string>
+    <string name="all_see">모두 보기</string>
+    <string name="ticketing">예매하기</string>
+    <string name="default_adv_parti">8.2 (1,142명 참여)</string>
+    <string name="save">저 장</string>
+    <string name="cancel">취 소</string>
+    <string name="default_id">kym71**</string>
+    <string name="default_time">12분전</string>
+    <string name="default_review">적당히 재밌다. 오랜만에 잠 안오는 영화 봤네요.</string>
+    <string name="default_recommend">추천 0</string>
+    <string name="declare">신고하기</string>
+    <string name="title_activity_movie_list">MovieListActivity</string>
+    <string name="list_rate">예매율 61.6%</string>
+    <string name="list_level">15세 관람가</string>
+    <string name="list_d_day">D-1</string>
+    <string name="detail">상세보기</string>
+    <string name="int_value">%d</string>
+    <string name="str_movie_list">영화 목록</string>
+    <string name="str_movie_api">영화 API</string>
+    <string name="str_reservation">예매하기</string>
+    <string name="str_setting">설정</string>
+    <string name="str_users_setting">사용자 설정</string>
+    <string name="list_fragment_title">%d. %s</string>
+    <string name="list_fragment_rate">예매율 %.1f%%</string>
+    <string name="list_fragment_grade">%d세 관람가</string>
+    <string name="detail_fragment_date">%s 개봉</string>
+    <string name="detail_fragment_genre_time">%s / %d분</string>
+    <string name="float_value">%.1f</string>
+    <string name="detail_fragment_rank">%d위</string>
+    <string name="detail_fragment_audience">%,d명</string>
+    <string name="detail_fragment_rate">%.1f%%</string>
+</resources>
