@@ -18,13 +18,16 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.example.mymovie.R;
 import com.example.mymovie.adapter.ReviewAdapter;
+import com.example.mymovie.data.AppDatabase;
 import com.example.mymovie.data.AppHelper;
 import com.example.mymovie.data.ResponseInfo;
-import com.example.mymovie.data.ReviewInfo;
+import com.example.mymovie.data.Review;
 import com.example.mymovie.data.ReviewList;
+import com.example.mymovie.utill.NetworkStatus;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.mymovie.utill.Constants.KEY_AUDIENCE_RATING;
 import static com.example.mymovie.utill.Constants.KEY_GRADE;
@@ -39,7 +42,7 @@ import static com.example.mymovie.utill.Constants.REQUEST_CODE;
 public class AllReviewActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ReviewAdapter adapter;
-    private ArrayList<ReviewInfo> reviewList;
+    private ArrayList<Review> reviewList;
     private TextView allReviewTitle;
     private ImageView allReviewGrade;
     private RatingBar ratingBar;
@@ -47,6 +50,7 @@ public class AllReviewActivity extends AppCompatActivity {
     private int id;
     private String movieTitle;
     private int movieGrade;
+    private AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +64,18 @@ public class AllReviewActivity extends AppCompatActivity {
         allReviewGrade = findViewById(R.id.activity_all_review_grade);
         ratingBar = findViewById(R.id.activity_all_review_rating);
         reviewRate = findViewById(R.id.activity_all_review_review_rate);
-        getData();
-        requestReview(id);
+        database = AppDatabase.getInstance(getApplicationContext());
+
+        int status = NetworkStatus.getConnectivityStatus(getApplicationContext());
+
+        if (status == NetworkStatus.TYPE_MOBILE || status == NetworkStatus.TYPE_WIFI) {
+            Toast.makeText(getApplicationContext(), "서버로부터 데이터를 요청합니다.", Toast.LENGTH_SHORT).show();
+            getData();
+            requestReview(id);
+        } else {
+            Toast.makeText(getApplicationContext(), "인터넷 연결 실패\n 단말기 저장 내용을 불러옵니다.", Toast.LENGTH_SHORT).show();
+            dataLoadReview();
+        }
 
         Button button = findViewById(R.id.writeOneLine);
         button.setOnClickListener(v -> showCommentWriteActivity());
@@ -72,6 +86,18 @@ public class AllReviewActivity extends AppCompatActivity {
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
+    }
+
+    /**
+     * 리뷰 데이터 단말기에서 불러오기
+     */
+    public void dataLoadReview() {
+        List<Review> review = database.reviewDao().select();
+        this.reviewList.clear();
+        this.reviewList.addAll(review);
+        adapter.addItems(this.reviewList);
+        adapter.notifyDataSetChanged();
+        recyclerView.setAdapter(adapter);
     }
 
     /**
@@ -145,12 +171,15 @@ public class AllReviewActivity extends AppCompatActivity {
 
         if (info.getCode() == 200) {
             ReviewList reviewList = gson.fromJson(response, ReviewList.class);
-            this.reviewList.clear();
-            this.reviewList.addAll(reviewList.result);
-            adapter.addItems(this.reviewList);
-            recyclerView.setAdapter(adapter);
+
+            database.reviewDao().clear();
+            for (int i = 0; i < reviewList.result.size(); i++) {
+                database.reviewDao().insertReviews(reviewList.result.get(i));
+            }
+            dataLoadReview();
         }
     }
+
     /**
      * 리뷰 작성 액티비티 이동
      */

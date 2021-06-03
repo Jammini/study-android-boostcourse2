@@ -14,20 +14,25 @@ import androidx.viewpager.widget.ViewPager;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.mymovie.utill.Constants;
 import com.example.mymovie.R;
 import com.example.mymovie.adapter.MoviePagerAdapter;
+import com.example.mymovie.data.AppDatabase;
 import com.example.mymovie.data.AppHelper;
-import com.example.mymovie.data.MovieInfo;
+import com.example.mymovie.data.Movie;
 import com.example.mymovie.data.MovieList;
 import com.example.mymovie.data.ResponseInfo;
+import com.example.mymovie.utill.Constants;
+import com.example.mymovie.utill.NetworkStatus;
 import com.google.gson.Gson;
+
+import java.util.List;
 
 /**
  * 영화 리스트 화면
  */
 public class ListFragment extends Fragment {
     private MoviePagerAdapter movieAdapter;
+    private AppDatabase database;
 
     @Nullable
     @Override
@@ -44,9 +49,19 @@ public class ListFragment extends Fragment {
             AppHelper.requestQueue = Volley.newRequestQueue(getContext());
         }
         movieAdapter = new MoviePagerAdapter(getFragmentManager());
-        requestMovieList();
-        pager.setAdapter(movieAdapter);
 
+        database = AppDatabase.getInstance(getContext());
+
+        int status = NetworkStatus.getConnectivityStatus(getContext());
+
+        if (status == NetworkStatus.TYPE_MOBILE || status == NetworkStatus.TYPE_WIFI) {
+            Toast.makeText(getContext(), "서버로부터 데이터를 요청합니다.", Toast.LENGTH_SHORT).show();
+            requestMovieList();
+        } else {
+            Toast.makeText(getContext(), "인터넷 연결 실패\n 단말기 저장 내용을 불러옵니다.", Toast.LENGTH_SHORT).show();
+            dataLoadMovie();
+        }
+        pager.setAdapter(movieAdapter);
         return rootView;
     }
 
@@ -60,7 +75,7 @@ public class ListFragment extends Fragment {
         StringRequest request = new StringRequest(
                 Request.Method.GET,
                 url,
-                response -> processResponse(response),
+                this::processResponse,
                 error -> Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show()
         );
         request.setShouldCache(false);
@@ -78,12 +93,12 @@ public class ListFragment extends Fragment {
 
         if (info.getCode() == 200) {
             MovieList movieList = gson.fromJson(response, MovieList.class);
-
+            database.movieDao().clear();
             for (int i = 0; i < movieList.result.size(); i++) {
-                MovieInfo movieInfo = movieList.result.get(i);
-                movieAdapter.addItem(setData(i + 1, movieInfo.getId(), movieInfo.getImage(), movieInfo.getTitle(), movieInfo.getReservation_rate(), movieInfo.getGrade(), movieInfo.getDate()));
-                movieAdapter.notifyDataSetChanged();
+                Movie movie = movieList.result.get(i);
+                database.movieDao().insertMovie(movie);
             }
+            dataLoadMovie();
         }
     }
 
@@ -111,5 +126,18 @@ public class ListFragment extends Fragment {
         bundle.putString(Constants.KEY_DATE, date);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    /**
+     * 영화 정보 단말기에서 불러오기
+     */
+    public void dataLoadMovie() {
+        List<Movie> movies = database.movieDao().selectMovies();
+        Movie movie;
+        for (int i = 0; i < movies.size(); i++) {
+            movie = movies.get(i);
+            movieAdapter.addItem(setData(i + 1, movie.getId(), movie.getImage(), movie.getTitle(), movie.getReservation_rate(), movie.getGrade(), movie.getDate()));
+        }
+        movieAdapter.notifyDataSetChanged();
     }
 }

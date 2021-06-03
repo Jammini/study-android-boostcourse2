@@ -13,8 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.example.mymovie.utill.Constants;
 import com.example.mymovie.R;
+import com.example.mymovie.utill.Constants;
 
 /**
  * 영화 목록 화면
@@ -32,7 +32,7 @@ public class PosterFragment extends Fragment {
 
         Bundle bundle = getArguments();
 
-        if (getArguments() != null){
+        if (getArguments() != null) {
             Glide.with(this).load(bundle.getString(Constants.KEY_IMAGE_URL)).into(posterImg);
             posterTitle.setText(String.format(getString(R.string.list_fragment_title), bundle.getInt(Constants.KEY_INDEX), bundle.getString(Constants.KEY_TITLE)));
             reservationRate.setText(String.format(getString(R.string.list_fragment_rate), bundle.getFloat(Constants.KEY_RATE)));

@@ -12,30 +12,30 @@ import java.util.ArrayList;
  * 영화 목록 어댑터
  */
 public class MoviePagerAdapter extends FragmentStatePagerAdapter {
-        ArrayList<Fragment> items = new ArrayList<>();
+    ArrayList<Fragment> items = new ArrayList<>();
 
-        public MoviePagerAdapter(@NonNull FragmentManager fm) {
-            super(fm);
-        }
-
-        public void addItem(Fragment item) {
-            items.add(item);
-        }
-
-        @NonNull
-        @Override
-        public Fragment getItem(int position) {
-            return items.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return items.size();
-        }
-
-        @Nullable
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return "페이지 " + position;
-        }
+    public MoviePagerAdapter(@NonNull FragmentManager fm) {
+        super(fm);
     }
+
+    public void addItem(Fragment item) {
+        items.add(item);
+    }
+
+    @NonNull
+    @Override
+    public Fragment getItem(int position) {
+        return items.get(position);
+    }
+
+    @Override
+    public int getCount() {
+        return items.size();
+    }
+
+    @Nullable
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return "페이지 " + position;
+    }
+}

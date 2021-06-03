@@ -25,15 +25,18 @@ import com.example.mymovie.R;
 import com.example.mymovie.activity.AllReviewActivity;
 import com.example.mymovie.activity.ReviewWriteActivity;
 import com.example.mymovie.adapter.ReviewAdapter;
+import com.example.mymovie.data.AppDatabase;
 import com.example.mymovie.data.AppHelper;
-import com.example.mymovie.data.MovieInfo;
+import com.example.mymovie.data.Movie;
 import com.example.mymovie.data.MovieList;
 import com.example.mymovie.data.ResponseInfo;
-import com.example.mymovie.data.ReviewInfo;
+import com.example.mymovie.data.Review;
 import com.example.mymovie.data.ReviewList;
+import com.example.mymovie.utill.NetworkStatus;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 import static com.example.mymovie.utill.Constants.KEY_AUDIENCE_RATING;
@@ -70,12 +73,13 @@ public class DetailFragment extends Fragment {
     private TextView likeCountTextView;
     private TextView dislikeCountTextView;
     private RecyclerView recyclerView;
-    private ArrayList<ReviewInfo> reviewList;
+    private ArrayList<Review> reviewList;
     private int id;
     private String movieTitle;
     private float reviewRating;
     private int movieGrade;
     private float audiRating;
+    private AppDatabase database;
 
     @Nullable
     @Override
@@ -105,13 +109,26 @@ public class DetailFragment extends Fragment {
         reviewList = new ArrayList<>();
         adapter = new ReviewAdapter(getContext());
 
+        database = AppDatabase.getInstance(getContext());
+
         if (getArguments() != null) {
             Bundle bundle = getArguments();
             id = bundle.getInt(KEY_INDEX);
             movieTitle = bundle.getString(KEY_TITLE);
+
+        }
+        int status = NetworkStatus.getConnectivityStatus(getContext());
+
+        if (status == NetworkStatus.TYPE_MOBILE || status == NetworkStatus.TYPE_WIFI) {
+            Toast.makeText(getContext(), "서버로부터 데이터를 요청합니다.", Toast.LENGTH_SHORT).show();
             requestMovieDetail(id);
             requestReview(id);
+        } else {
+            Toast.makeText(getContext(), "인터넷 연결 실패\n 단말기 저장 내용을 불러옵니다.", Toast.LENGTH_SHORT).show();
+            dataLoadMovieDetail();
+            dataLoadReview();
         }
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
 
@@ -128,6 +145,46 @@ public class DetailFragment extends Fragment {
         allReviewBtn.setOnClickListener(v -> showAllReviewActivity());
 
         return rootView;
+    }
+
+    /**
+     * 영화 상세보기 단말기에서 불러오기
+     */
+    public void dataLoadMovieDetail() {
+        Movie movieInfo = database.movieDao().selectMovieDetail(id);
+
+        reviewRating = movieInfo.getAudience_rating();
+        audiRating = movieInfo.getAudience_rating();
+        Glide.with(getContext()).load(movieInfo.getThumb()).into(movieDetailPoster);
+        title.setText(movieInfo.getTitle());
+        setIcon(movieInfo.getGrade());
+        date.setText(String.format(getString(R.string.detail_fragment_date), movieInfo.getDate()));
+        genre.setText(String.format(getString(R.string.detail_fragment_genre_time), movieInfo.getGenre(), movieInfo.getDuration()));
+        ranking.setText(String.format(getString(R.string.detail_fragment_rank), movieInfo.getReservation_grade()));
+        reservationRate.setText(String.format(getString(R.string.detail_fragment_rate), movieInfo.getReservation_rate()));
+        userRating.setRating(movieInfo.getAudience_rating() / 2);
+        audienceRating.setText(String.format(getString(R.string.float_value), movieInfo.getAudience_rating()));
+        audience.setText(String.format(getString(R.string.detail_fragment_audience), movieInfo.getAudience()));
+        synopsis.setText(movieInfo.getSynopsis());
+        director.setText(movieInfo.getDirector());
+        actor.setText(movieInfo.getActor());
+        likeCountTextView.setText(String.format(getString(R.string.int_value), movieInfo.getLike()));
+        dislikeCountTextView.setText(String.format(getString(R.string.int_value), movieInfo.getDislike()));
+        likeCount = Integer.parseInt(likeCountTextView.getText().toString());
+        dislikeCount = Integer.parseInt(dislikeCountTextView.getText().toString());
+    }
+
+    /**
+     * 리뷰 데이터 단말기에서 불러오기
+     */
+    public void dataLoadReview() {
+        List<Review> review = database.reviewDao().select();
+        this.reviewList.clear();
+        this.reviewList.add(review.get(0));
+        this.reviewList.add(review.get(1));
+        adapter.addItems(this.reviewList);
+        adapter.notifyDataSetChanged();
+        recyclerView.setAdapter(adapter);
     }
 
     /**
@@ -160,26 +217,8 @@ public class DetailFragment extends Fragment {
 
         if (info.getCode() == 200) {
             MovieList movieList = gson.fromJson(response, MovieList.class);
-            MovieInfo movieInfo = movieList.result.get(0);
-            reviewRating = movieInfo.getReviewer_rating();
-            audiRating = movieInfo.getAudience_rating();
-            Glide.with(this).load(movieInfo.getThumb()).into(movieDetailPoster);
-            title.setText(movieInfo.getTitle());
-            setIcon(movieInfo.getGrade());
-            date.setText(String.format(getString(R.string.detail_fragment_date), movieInfo.getDate()));
-            genre.setText(String.format(getString(R.string.detail_fragment_genre_time), movieInfo.getGenre(), movieInfo.getDuration()));
-            ranking.setText(String.format(getString(R.string.detail_fragment_rank), movieInfo.getReservation_grade()));
-            reservationRate.setText(String.format(getString(R.string.detail_fragment_rate), movieInfo.getReservation_rate()));
-            userRating.setRating(movieInfo.getAudience_rating() / 2);
-            audienceRating.setText(String.format(getString(R.string.float_value), movieInfo.getAudience_rating()));
-            audience.setText(String.format(getString(R.string.detail_fragment_audience), movieInfo.getAudience()));
-            synopsis.setText(movieInfo.getSynopsis());
-            director.setText(movieInfo.getDirector());
-            actor.setText(movieInfo.getActor());
-            likeCountTextView.setText(String.format(getString(R.string.int_value), movieInfo.getLike()));
-            dislikeCountTextView.setText(String.format(getString(R.string.int_value), movieInfo.getDislike()));
-            likeCount = Integer.parseInt(likeCountTextView.getText().toString());
-            dislikeCount = Integer.parseInt(dislikeCountTextView.getText().toString());
+            database.movieDao().update(movieList.result.get(0));
+            dataLoadMovieDetail();
         }
     }
 
@@ -189,7 +228,7 @@ public class DetailFragment extends Fragment {
      * @param id 해당 영화 아이디
      */
     public void requestReview(int id) {
-        String url = "http://" + AppHelper.host + ":" + AppHelper.port + "/movie/readCommentList?id=" + id + "&limit=2";
+        String url = "http://" + AppHelper.host + ":" + AppHelper.port + "/movie/readCommentList?id=" + id;
         StringRequest request = new StringRequest(
                 Request.Method.GET,
                 url,
@@ -210,10 +249,13 @@ public class DetailFragment extends Fragment {
 
         if (info.getCode() == 200) {
             ReviewList reviewList = gson.fromJson(response, ReviewList.class);
-            this.reviewList.clear();
-            this.reviewList.addAll(reviewList.result);
-            adapter.addItems(this.reviewList);
-            recyclerView.setAdapter(adapter);
+
+            database.reviewDao().clear();
+
+            for (int i = 0; i < reviewList.result.size(); i++) {
+                database.reviewDao().insertReviews(reviewList.result.get(i));
+            }
+            dataLoadReview();
         }
     }
 
@@ -237,12 +279,13 @@ public class DetailFragment extends Fragment {
         intent.putExtra(KEY_TITLE, movieTitle);
         intent.putExtra(KEY_GRADE, movieGrade);
         intent.putExtra(KEY_USER_RATING, reviewRating);
-        intent.putExtra(KEY_AUDIENCE_RATING, ""+audiRating);
+        intent.putExtra(KEY_AUDIENCE_RATING, "" + audiRating);
         startActivityForResult(intent, REQUEST_REVIEW_CODE);
     }
 
     /**
      * 받아온 결과 처리
+     *
      * @param requestCode 요청 코드
      * @param resultCode  응답 코드
      * @param intent      응답 인텐트
@@ -293,6 +336,7 @@ public class DetailFragment extends Fragment {
      */
     public void likeClick() {
         String url = "http://" + AppHelper.host + ":" + AppHelper.port + "/movie/increaseLikeDisLike?id=" + id + "&likeyn=";
+
         if (!likeButton.isSelected() && !dislikeButton.isSelected()) {
             url += "Y";
             likeCount++;

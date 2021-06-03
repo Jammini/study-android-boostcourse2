@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mymovie.R;
-import com.example.mymovie.data.ReviewInfo;
+import com.example.mymovie.data.Review;
 
 import java.util.ArrayList;
 
@@ -27,7 +27,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
         public void onItemClick(ViewHolder viewHolder, View view, int position);
     }
 
-    ArrayList<ReviewInfo> items = new ArrayList<>();
+    ArrayList<Review> items = new ArrayList<>();
 
     public ReviewAdapter(Context context) {
         this.context = context;
@@ -44,7 +44,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ReviewInfo item = items.get(position);
+        Review item = items.get(position);
         holder.setItem(item);
 
         holder.setOnItemClickListener(listener);
@@ -55,15 +55,15 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
         return items.size();
     }
 
-    public void addItem(ReviewInfo item) {
+    public void addItem(Review item) {
         items.add(item);
     }
 
-    public void addItems(ArrayList<ReviewInfo> items) {
+    public void addItems(ArrayList<Review> items) {
         this.items = items;
     }
 
-    public ReviewInfo getItem(int position) {
+    public Review getItem(int position) {
         return items.get(position);
     }
 
@@ -93,7 +93,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
             recommend.setOnClickListener(v -> {
                 int position = getAdapterPosition();
-                ReviewInfo item = getItem(position);
+                Review item = getItem(position);
 
                 int recommendCount = item.getRecommend();
                 recommendCount++;
@@ -103,7 +103,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
             reportBtn.setOnClickListener(v -> {
                 int position = getAdapterPosition();
-                ReviewInfo item = getItem(position);
+                Review item = getItem(position);
                 Toast.makeText(context, item.getWriter() + " 사용자 \n신고완료.", Toast.LENGTH_LONG).show();
             });
         }
@@ -113,9 +113,9 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
          *
          * @param item 입력 프로필
          */
-        public void setItem(ReviewInfo item) {
+        public void setItem(Review item) {
             int image = item.getWriter_image();
-            if (image == 0){
+            if (image == 0) {
                 image = R.drawable.user1;
             }
             imageProfile.setImageResource(image);
