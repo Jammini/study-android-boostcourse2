@@ -84,4 +84,12 @@ public class Movie {
      * 썸네일 URL
      */
     private String thumb;
+    /**
+     * 갤러리 이미지
+     */
+    private String photos;
+    /**
+     * 갤러리 동영상
+     */
+    private String videos;
 }

@@ -4,6 +4,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+/**
+ * 네트워크 상태
+ */
 public class NetworkStatus {
 
     public static final int TYPE_WIFI = 1;

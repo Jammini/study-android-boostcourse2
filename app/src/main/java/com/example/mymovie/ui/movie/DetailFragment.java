@@ -1,12 +1,14 @@
 package com.example.mymovie.ui.movie;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +25,10 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.mymovie.R;
 import com.example.mymovie.activity.AllReviewActivity;
+import com.example.mymovie.activity.PhotoViewActivity;
 import com.example.mymovie.activity.ReviewWriteActivity;
+import com.example.mymovie.adapter.GalleryAdapter;
+import com.example.mymovie.adapter.GalleryItem;
 import com.example.mymovie.adapter.ReviewAdapter;
 import com.example.mymovie.data.AppDatabase;
 import com.example.mymovie.data.AppHelper;
@@ -32,6 +37,7 @@ import com.example.mymovie.data.MovieList;
 import com.example.mymovie.data.ResponseInfo;
 import com.example.mymovie.data.Review;
 import com.example.mymovie.data.ReviewList;
+import com.example.mymovie.utill.Constants;
 import com.example.mymovie.utill.NetworkStatus;
 import com.google.gson.Gson;
 
@@ -80,6 +86,8 @@ public class DetailFragment extends Fragment {
     private int movieGrade;
     private float audiRating;
     private AppDatabase database;
+    private GalleryAdapter galleryAdapter;
+    private LinearLayout container_gallery;
 
     @Nullable
     @Override
@@ -104,10 +112,12 @@ public class DetailFragment extends Fragment {
         actor = rootView.findViewById(R.id.fragment_detail_actor);
         likeCountTextView = rootView.findViewById(R.id.fragment_detail_likeCount);
         dislikeCountTextView = rootView.findViewById(R.id.fragment_detail_dislikeCount);
-
+        container_gallery = rootView.findViewById(R.id.container_gallery);
         recyclerView = rootView.findViewById(R.id.recyclerView);
         reviewList = new ArrayList<>();
         adapter = new ReviewAdapter(getContext());
+
+        galleryAdapter = new GalleryAdapter();
 
         database = AppDatabase.getInstance(getContext());
 
@@ -128,6 +138,21 @@ public class DetailFragment extends Fragment {
             dataLoadMovieDetail();
             dataLoadReview();
         }
+
+        galleryAdapter.setOnItemClickListener(position -> {
+            String url = galleryAdapter.getItem(position).getUrl();
+            if (galleryAdapter.getItem(position).getType().equals(Constants.GALLERY_TYPE_MOVIE)) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            } else {
+                Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
+                intent.putExtra(Constants.KEY_IMAGE_URL, galleryAdapter.getItem(position).getThumbUrl());
+                startActivity(intent);
+            }
+        });
+
+        RecyclerView recyclerViewGallery = rootView.findViewById(R.id.recyclerViewGallery);
+        recyclerViewGallery.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewGallery.setAdapter(galleryAdapter);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
@@ -172,6 +197,7 @@ public class DetailFragment extends Fragment {
         dislikeCountTextView.setText(String.format(getString(R.string.int_value), movieInfo.getDislike()));
         likeCount = Integer.parseInt(likeCountTextView.getText().toString());
         dislikeCount = Integer.parseInt(dislikeCountTextView.getText().toString());
+        setGalleryList(movieInfo);
     }
 
     /**
@@ -417,5 +443,30 @@ public class DetailFragment extends Fragment {
         );
         request.setShouldCache(false);
         AppHelper.requestQueue.add(request);
+    }
+
+    /**
+     * 갤러리 리스트 세팅
+     * @param movie 영화 상세 정보
+     */
+    private void setGalleryList(Movie movie) {
+        if (movie.getPhotos() != null && movie.getVideos() != null) {
+            String[] photos = movie.getPhotos().split(",");
+            String[] videos = movie.getVideos().split(",");
+            ArrayList<GalleryItem> items = new ArrayList<>();
+
+            for (String s : photos) {
+                items.add(new GalleryItem(s, Constants.GALLERY_TYPE_PHOTO, s));
+            }
+
+            for (String s : videos) {
+                String id = s.split("/")[3];
+                items.add(new GalleryItem("https://img.youtube.com/vi/" + id + "/0.jpg", Constants.GALLERY_TYPE_MOVIE, s));
+            }
+            galleryAdapter.addItems(items);
+            galleryAdapter.notifyDataSetChanged();
+        } else {
+            container_gallery.setVisibility(View.GONE);
+        }
     }
 }

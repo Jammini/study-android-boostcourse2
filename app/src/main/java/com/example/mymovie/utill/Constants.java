@@ -43,7 +43,15 @@ public class Constants {
      */
     public static final String KEY_USER_RATING = "USER_RATING";
     /**
-     * 청줌 평점
+     * 청중 평점
      */
     public static final String KEY_AUDIENCE_RATING = "AUDIENCE_RATING";
+    /**
+     * 영화 상세정보
+     */
+    public static final String GALLERY_TYPE_MOVIE = "MOVIE";
+    /**
+     * 영화 상세정보 갤러리
+     */
+    public static final String GALLERY_TYPE_PHOTO = "PHOTO";
 }
